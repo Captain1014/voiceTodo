@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>To-Do List with Web Speech API</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <h1>To-Do List</h1>
+      <form>
+        <input type="text" id="task-input" class="form-control mb-2 mr-sm-2" placeholder="Add task with your voice">
+        <button type="button" id="add-button" class="btn btn-primary mb-2" onclick="startSpeechRecognition()">Add Task</button>
+        <button type="button" id="clear-button" class="btn btn-danger mb-2">Clear List</button>
+        <button type="button" id="read-button" class="btn btn-orange mb-2" onclick="readList()">Read List</button>
+
+      </form>
+      <ul id="task-list" class="list-group"></ul>
+    </div>
+
+    <script>
+      const recognition = new webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      const taskInput = document.getElementById('task-input');
+      const addButton = document.getElementById('add-button');
+      const clearButton = document.getElementById('clear-button');
+      const readButton = document.getElementById('read-button');
+      const taskList = document.getElementById('task-list');
+
+      addButton.addEventListener('click', () => {
+        startSpeechRecognition();
+      });
+
+      clearButton.addEventListener('click', () => {
+        clearList();
+      });
+
+      recognition.onresult = (event) => {
+        const text = event.results[event.results.length - 1][0].transcript;
+        taskInput.value = text;
+        addTask();
+      };
+
+      function addTask() {
+        const task = taskInput.value.trim();
+        if (task) {
+            const taskItem = document.createElement('li');
+            taskItem.classList.add('list-group-item');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.classList.add('mr-2');
+            taskItem.appendChild(checkbox);
+
+            const taskText = document.createElement('span');
+            taskText.innerText = task;
+            taskItem.appendChild(taskText);
+
+            taskList.appendChild(taskItem);
+            taskInput.value = '';
+        }
+        }
+
+
+      function clearList() {
+        taskList.innerHTML = '';
+      }
+
+      function startSpeechRecognition() {
+        recognition.start();
+        taskInput.placeholder = 'Speak now...';
+      }
+
+      recognition.onend = () => {
+        taskInput.placeholder = 'Add task with your voice';
+      }
+
+      function readList() {
+        const utterance = new SpeechSynthesisUtterance(taskList.innerText);
+        speechSynthesis.speak(utterance);
+      }
+    </script>
+  </body>
+</html>
